@@ -1,13 +1,8 @@
-/**
- * @format
- */
-
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
 import App from '../App';
+import { renderAsync, screen } from '@testing-library/react-native';
 
 test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
-  });
+  await renderAsync(<App />);
+  expect(screen.getByTestId('SafeAreaProvider')).toBeOnTheScreen();
 });
