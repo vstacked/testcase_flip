@@ -2,10 +2,13 @@ import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
+import { TransactionResponse } from '@src/features/transaction';
 
 type RootStackParamList = {
   TransactionList: undefined;
-  Detail: undefined;
+  Detail: {
+    item: TransactionResponse;
+  };
 };
 
 export const Stack = createNativeStackNavigator<RootStackParamList>();

@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: 'white',
     margin: 24,
-    borderRadius: 10,
-    paddingVertical: 16,
+    borderRadius: 5,
+    paddingVertical: 24,
   },
   option: {
     flexDirection: 'row',

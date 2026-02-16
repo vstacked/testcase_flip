@@ -1,4 +1,4 @@
-import { ModalFilter } from '@src/features/transaction/components/ModalFilter';
+import { ModalFilter } from '@src/features/transaction';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 describe('ModalFilter', () => {

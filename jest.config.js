@@ -6,5 +6,6 @@ module.exports = {
   "setupFilesAfterEnv": ["./jest/setup.js"],
   moduleNameMapper: {
     '\\.(ttf)$': '<rootDir>/__mocks__/file-mock.js',
-  }
+  },
+  clearMocks: true,
 };

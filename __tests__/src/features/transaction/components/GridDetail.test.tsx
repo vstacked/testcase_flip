@@ -1,4 +1,4 @@
-import { GridDetail } from '@src/features/transaction/components/GridDetail';
+import { GridDetail } from '@src/features/transaction';
 import { render, screen } from '@testing-library/react-native';
 
 describe('GridDetail', () => {

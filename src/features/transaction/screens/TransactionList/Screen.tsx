@@ -1,32 +1,77 @@
-import React, { useCallback, useState } from 'react';
-import { View, FlatList, ListRenderItem } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  View,
+  FlatList,
+  ListRenderItem,
+  ActivityIndicator,
+  Text,
+  RefreshControl,
+} from 'react-native';
 import useGetKeyboardOffset from '@src/shared/hook/useGetKeyboardOffset';
 import { filterOptions } from '@src/constants/filterOptions';
-import { ModalFilter } from '../../components/ModalFilter';
 import { TransactionListScreenProps } from '@src/navigation/types';
-import { SearchBar } from '../../components/SearchBar';
-import { TransactionItem } from '../../components/TransactionItem';
 import { Container } from '@src/shared/components/Container';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  ModalFilter,
+  queryKeyTransactionList,
+  SearchBar,
+  TransactionItem,
+  TransactionResponse,
+  useFetchTransactionList,
+} from '../..';
 
 export const TransactionListScreen = ({
   navigation,
 }: TransactionListScreenProps) => {
+  const queryClient = useQueryClient();
+
   const { offset } = useGetKeyboardOffset();
 
   const [showModal, setShowModal] = useState(false);
 
+  const [skip, setSkip] = useState(0);
+
   const [option, setOption] =
     useState<(typeof filterOptions)[number]>('URUTKAN');
 
-  const renderItem = useCallback<ListRenderItem<number>>(
+  const [transactionData, setTransactionData] = useState<TransactionResponse[]>(
+    [],
+  );
+
+  const { isPending, error, data, isFetching, isPlaceholderData } =
+    useFetchTransactionList({ skip, option });
+
+  // useEffect(() => {
+  //   if (!isPlaceholderData && data && data?.skip < data?.total) {
+  //     queryClient.prefetchQuery({
+  //       queryKey: ['transactionList', skip + 10],
+  //       queryFn: () =>
+  //         transactionService.getTransactionList({ skip: skip + 10 }),
+  //     });
+  //   }
+  // }, [data, isPlaceholderData, skip, queryClient]);
+
+  useEffect(() => {
+    if (data) {
+      setTransactionData(prev => Array.from(new Set([...prev, ...data])));
+    }
+  }, [data]);
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: [queryKeyTransactionList] });
+    setSkip(0);
+    setTransactionData([]);
+  };
+
+  const renderItem = useCallback<ListRenderItem<TransactionResponse>>(
     ({ item }) => {
-      const success = item % 2 === 0;
       return (
         <TransactionItem
+          item={item}
           onTap={() => {
-            navigation.navigate('Detail');
+            navigation.navigate('Detail', { item });
           }}
-          success={success}
         />
       );
     },
@@ -44,11 +89,29 @@ export const TransactionListScreen = ({
           }}
         />
 
-        <FlatList<number>
+        <FlatList<TransactionResponse>
           testID="transaction-list"
-          data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
-          ListFooterComponent={<View style={{ marginBottom: offset || 16 }} />}
-          //   refreshControl={}
+          data={transactionData}
+          onEndReached={() => {
+            // if (data && data.skip < data.total) setSkip(prev => prev + 10);
+          }}
+          ListHeaderComponent={
+            <>
+              {skip === 0 && isPending && (
+                <ActivityIndicator testID="pending-indicator" />
+              )}
+            </>
+          }
+          ListFooterComponent={
+            <View>
+              {isFetching && <ActivityIndicator testID="fetching-indicator" />}
+              {error && <Text>{error.message}</Text>}
+              <View style={{ marginBottom: offset || 16 }} />
+            </View>
+          }
+          refreshControl={
+            <RefreshControl refreshing={isFetching} onRefresh={handleRefresh} />
+          }
           renderItem={renderItem}
         />
       </Container>
@@ -59,7 +122,10 @@ export const TransactionListScreen = ({
         onClose={() => {
           setShowModal(false);
         }}
-        onSelect={setOption}
+        onSelect={val => {
+          setOption(val);
+          handleRefresh();
+        }}
       />
     </>
   );

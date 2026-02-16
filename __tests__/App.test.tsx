@@ -1,6 +1,8 @@
 import React from 'react';
 import App from '../App';
-import { renderAsync, screen } from '@testing-library/react-native';
+import { cleanup, renderAsync, screen } from '@testing-library/react-native';
+
+afterEach(cleanup);
 
 test('renders correctly', async () => {
   await renderAsync(<App />);
