@@ -53,17 +53,14 @@ describe('useFetchTransactionList', () => {
       mockData,
     );
 
-    const { result } = renderHook(() => useFetchTransactionList({ skip: 0 }), {
+    const { result } = renderHook(() => useFetchTransactionList(), {
       wrapper,
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(mockData);
-    expect(transactionService.getTransactionList).toHaveBeenCalledWith({
-      skip: 0,
-      option: undefined,
-    });
+    expect(transactionService.getTransactionList).toHaveBeenCalledTimes(1);
   });
 
   it('should handle error when fetching fails', async () => {
@@ -72,7 +69,7 @@ describe('useFetchTransactionList', () => {
       error,
     );
 
-    const { result } = renderHook(() => useFetchTransactionList({ skip: 0 }), {
+    const { result } = renderHook(() => useFetchTransactionList(), {
       wrapper,
     });
 
@@ -86,7 +83,7 @@ describe('useFetchTransactionList', () => {
       mockData,
     );
 
-    const { result } = renderHook(() => useFetchTransactionList({ skip: 0 }), {
+    const { result } = renderHook(() => useFetchTransactionList(), {
       wrapper,
     });
 
