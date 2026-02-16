@@ -6,6 +6,7 @@ export { GridDetail } from './components/GridDetail';
 export { ModalFilter } from './components/ModalFilter';
 export { SearchBar } from './components/SearchBar';
 export { TransactionItem } from './components/TransactionItem';
+export { default as useLocalFunction } from './hooks/useLocalFunction';
 export {
   useFetchTransactionList,
   queryKeyTransactionList,

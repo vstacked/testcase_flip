@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   FlatList,
@@ -19,6 +19,7 @@ import {
   TransactionItem,
   TransactionResponse,
   useFetchTransactionList,
+  useLocalFunction,
 } from '../..';
 
 export const TransactionListScreen = ({
@@ -30,6 +31,8 @@ export const TransactionListScreen = ({
 
   const [showModal, setShowModal] = useState(false);
 
+  const [keyword, setKeyword] = useState<string>('');
+
   const [option, setOption] =
     useState<(typeof filterOptions)[number]>('URUTKAN');
 
@@ -38,6 +41,22 @@ export const TransactionListScreen = ({
   );
 
   const { isPending, error, data, isFetching } = useFetchTransactionList();
+
+  const { searchItems, filterItems } = useLocalFunction();
+
+  const memoizedData = useMemo(() => {
+    let result = transactionData;
+
+    if (option !== 'URUTKAN') {
+      result = filterItems(option, result);
+    }
+
+    if (keyword.length > 0) {
+      result = searchItems(keyword, result);
+    }
+
+    return result;
+  }, [transactionData, keyword, option, searchItems, filterItems]);
 
   useEffect(() => {
     if (data) {
@@ -70,14 +89,12 @@ export const TransactionListScreen = ({
         <SearchBar
           onTapOptions={() => setShowModal(true)}
           option={option}
-          onValueChange={value => {
-            console.log(value);
-          }}
+          onValueChange={setKeyword}
         />
 
         <FlatList<TransactionResponse>
           testID="transaction-list"
-          data={transactionData}
+          data={memoizedData}
           ListHeaderComponent={
             <>{isPending && <ActivityIndicator testID="pending-indicator" />}</>
           }
@@ -101,10 +118,7 @@ export const TransactionListScreen = ({
         onClose={() => {
           setShowModal(false);
         }}
-        onSelect={val => {
-          setOption(val);
-          handleRefresh();
-        }}
+        onSelect={setOption}
       />
     </>
   );
