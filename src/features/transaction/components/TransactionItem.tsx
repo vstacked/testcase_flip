@@ -1,11 +1,13 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FontAwesome6 } from '@react-native-vector-icons/fontawesome6';
 import { Colors } from '@src/constants/colors';
+import { numberUtils, stringUtils, TransactionResponse } from '..';
 
 export const TransactionItem: React.FC<{
-  success: boolean;
+  item: TransactionResponse;
   onTap: () => void;
-}> = ({ success, onTap }) => {
+}> = ({ item, onTap }) => {
+  const success = item.status === 'SUCCESS';
   return (
     <TouchableOpacity
       activeOpacity={0.5}
@@ -15,13 +17,17 @@ export const TransactionItem: React.FC<{
     >
       <View style={styles.cardSpacing}>
         <View style={styles.cardTitle}>
-          <Text style={styles.cardTitleText}>Permata</Text>
+          <Text style={styles.cardTitleText}>
+            {stringUtils.uppercase(item.senderBank)}
+          </Text>
           <FontAwesome6 name="arrow-right-long" iconStyle="solid" size={14} />
-          <Text style={styles.cardTitleText}>BNI</Text>
+          <Text style={styles.cardTitleText}>
+            {stringUtils.uppercase(item.beneficiaryBank)}
+          </Text>
         </View>
 
         <View style={styles.cardContent}>
-          <Text>SYIFA SALSABYLA</Text>
+          <Text>{stringUtils.uppercase(item.beneficiaryName)}</Text>
 
           <View
             testID="badge"
@@ -39,9 +45,9 @@ export const TransactionItem: React.FC<{
         </View>
 
         <View style={styles.cardFooter}>
-          <Text>Rp10.028</Text>
+          <Text>{numberUtils.formatAmount(item.amount)}</Text>
           <FontAwesome6 name="circle" iconStyle="solid" size={5} />
-          <Text>8 April 2020</Text>
+          <Text>{stringUtils.dateFormat(item.createdAt)}</Text>
         </View>
       </View>
 

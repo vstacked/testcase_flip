@@ -1,12 +1,27 @@
-import { SearchBar } from '@src/features/transaction/components/SearchBar';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { SearchBar } from '@src/features/transaction';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 
 describe('SearchBar', () => {
   const onPressMock = jest.fn();
 
-  const toSelect = 'John Doe';
+  const toInput = 'John Doe';
 
-  it('renders correctly with option selected (URUTKAN)', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('renders correctly with option selected: URUTKAN', () => {
     render(
       <SearchBar
         option="URUTKAN"
@@ -34,7 +49,7 @@ describe('SearchBar', () => {
     expect(onPressMock).toHaveBeenCalled();
   });
 
-  it('should call onValueChange when typing in the search input', () => {
+  it('should call onValueChange when typing in the search input', async () => {
     render(
       <SearchBar
         option="URUTKAN"
@@ -45,8 +60,25 @@ describe('SearchBar', () => {
 
     fireEvent.changeText(
       screen.getByPlaceholderText('Cari nama, bank, atau nominal'),
-      toSelect,
+      toInput,
     );
-    expect(onPressMock).toHaveBeenCalled();
+    jest.advanceTimersByTime(300);
+    await waitFor(() => {
+      expect(onPressMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should be able to press the search icon', async () => {
+    render(
+      <SearchBar
+        option="URUTKAN"
+        onTapOptions={onPressMock}
+        onValueChange={onPressMock}
+      />,
+    );
+
+    const searchIcon = screen.getByTestId('icon-search-input');
+    expect(searchIcon).toBeTruthy();
+    fireEvent.press(searchIcon);
   });
 });

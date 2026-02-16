@@ -23,6 +23,7 @@ export const SearchBar: React.FC<{
   return (
     <View style={styles.header}>
       <TouchableOpacity
+        testID="icon-search-input"
         activeOpacity={1}
         onPress={() => inputRef.current?.focus()}
       >
@@ -35,14 +36,12 @@ export const SearchBar: React.FC<{
       </TouchableOpacity>
       <TextInput
         ref={inputRef}
-        accessibilityRole="search"
+        testID="search-input"
         style={styles.searchInput}
         placeholder="Cari nama, bank, atau nominal"
         placeholderTextColor={'rgba(0,0,0,0.25)'}
         keyboardType="web-search"
-        onChange={e => {
-          debounce(e.nativeEvent.text);
-        }}
+        onChangeText={debounce}
       />
       <TouchableOpacity
         style={styles.sortButton}
