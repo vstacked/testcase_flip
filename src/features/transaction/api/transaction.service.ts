@@ -1,5 +1,4 @@
 import { apiClient } from '@src/api/client';
-import { filterOptions } from '@src/constants/filterOptions';
 
 export interface TransactionResponse {
   id: string;
@@ -15,38 +14,9 @@ export interface TransactionResponse {
 }
 
 export const transactionService = {
-  getTransactionList: async ({
-    limit = 10,
-    skip,
-    option,
-  }: {
-    limit?: number;
-    skip: number;
-    option?: (typeof filterOptions)[number];
-  }): Promise<TransactionResponse[]> => {
+  getTransactionList: async (): Promise<TransactionResponse[]> => {
     try {
-      let queryParams: any = { limit, skip };
-      if (option) {
-        switch (option) {
-          case 'Nama A-Z':
-            queryParams.sortBy = 'title';
-            break;
-          case 'Nama Z-A':
-            queryParams.sortBy = 'body';
-            break;
-          case 'Tanggal Terbaru':
-            queryParams.order = 'desc';
-            break;
-          case 'Tanggal Terlama':
-            queryParams.order = 'asc';
-            break;
-        }
-      }
-
-      const response = await apiClient.get(
-        `/frontend-test`,
-        // queryParams
-      );
+      const response = await apiClient.get(`/frontend-test`);
       if (response.data && typeof response.data === 'object') {
         let list: TransactionResponse[] = [];
 

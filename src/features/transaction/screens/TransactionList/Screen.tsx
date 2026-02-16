@@ -30,8 +30,6 @@ export const TransactionListScreen = ({
 
   const [showModal, setShowModal] = useState(false);
 
-  const [skip, setSkip] = useState(0);
-
   const [option, setOption] =
     useState<(typeof filterOptions)[number]>('URUTKAN');
 
@@ -39,18 +37,7 @@ export const TransactionListScreen = ({
     [],
   );
 
-  const { isPending, error, data, isFetching, isPlaceholderData } =
-    useFetchTransactionList({ skip, option });
-
-  // useEffect(() => {
-  //   if (!isPlaceholderData && data && data?.skip < data?.total) {
-  //     queryClient.prefetchQuery({
-  //       queryKey: ['transactionList', skip + 10],
-  //       queryFn: () =>
-  //         transactionService.getTransactionList({ skip: skip + 10 }),
-  //     });
-  //   }
-  // }, [data, isPlaceholderData, skip, queryClient]);
+  const { isPending, error, data, isFetching } = useFetchTransactionList();
 
   useEffect(() => {
     if (data) {
@@ -60,7 +47,6 @@ export const TransactionListScreen = ({
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: [queryKeyTransactionList] });
-    setSkip(0);
     setTransactionData([]);
   };
 
@@ -92,15 +78,8 @@ export const TransactionListScreen = ({
         <FlatList<TransactionResponse>
           testID="transaction-list"
           data={transactionData}
-          onEndReached={() => {
-            // if (data && data.skip < data.total) setSkip(prev => prev + 10);
-          }}
           ListHeaderComponent={
-            <>
-              {skip === 0 && isPending && (
-                <ActivityIndicator testID="pending-indicator" />
-              )}
-            </>
+            <>{isPending && <ActivityIndicator testID="pending-indicator" />}</>
           }
           ListFooterComponent={
             <View>
