@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   FlatList,
@@ -19,6 +19,7 @@ import {
   TransactionItem,
   TransactionResponse,
   useFetchTransactionList,
+  useLocalFunction,
 } from '../..';
 
 export const TransactionListScreen = ({
@@ -30,7 +31,7 @@ export const TransactionListScreen = ({
 
   const [showModal, setShowModal] = useState(false);
 
-  const [skip, setSkip] = useState(0);
+  const [keyword, setKeyword] = useState<string>('');
 
   const [option, setOption] =
     useState<(typeof filterOptions)[number]>('URUTKAN');
@@ -39,18 +40,23 @@ export const TransactionListScreen = ({
     [],
   );
 
-  const { isPending, error, data, isFetching, isPlaceholderData } =
-    useFetchTransactionList({ skip, option });
+  const { isPending, error, data, isFetching } = useFetchTransactionList();
 
-  // useEffect(() => {
-  //   if (!isPlaceholderData && data && data?.skip < data?.total) {
-  //     queryClient.prefetchQuery({
-  //       queryKey: ['transactionList', skip + 10],
-  //       queryFn: () =>
-  //         transactionService.getTransactionList({ skip: skip + 10 }),
-  //     });
-  //   }
-  // }, [data, isPlaceholderData, skip, queryClient]);
+  const { searchItems, filterItems } = useLocalFunction();
+
+  const memoizedData = useMemo(() => {
+    let result = transactionData;
+
+    if (option !== 'URUTKAN') {
+      result = filterItems(option, result);
+    }
+
+    if (keyword.length > 0) {
+      result = searchItems(keyword, result);
+    }
+
+    return result;
+  }, [transactionData, keyword, option, searchItems, filterItems]);
 
   useEffect(() => {
     if (data) {
@@ -60,7 +66,6 @@ export const TransactionListScreen = ({
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: [queryKeyTransactionList] });
-    setSkip(0);
     setTransactionData([]);
   };
 
@@ -84,23 +89,14 @@ export const TransactionListScreen = ({
         <SearchBar
           onTapOptions={() => setShowModal(true)}
           option={option}
-          onValueChange={value => {
-            console.log(value);
-          }}
+          onValueChange={setKeyword}
         />
 
         <FlatList<TransactionResponse>
           testID="transaction-list"
-          data={transactionData}
-          onEndReached={() => {
-            // if (data && data.skip < data.total) setSkip(prev => prev + 10);
-          }}
+          data={memoizedData}
           ListHeaderComponent={
-            <>
-              {skip === 0 && isPending && (
-                <ActivityIndicator testID="pending-indicator" />
-              )}
-            </>
+            <>{isPending && <ActivityIndicator testID="pending-indicator" />}</>
           }
           ListFooterComponent={
             <View>
@@ -122,10 +118,7 @@ export const TransactionListScreen = ({
         onClose={() => {
           setShowModal(false);
         }}
-        onSelect={val => {
-          setOption(val);
-          handleRefresh();
-        }}
+        onSelect={setOption}
       />
     </>
   );
